@@ -73,7 +73,7 @@ public class Ball : MonoBehaviour
         leftLine.sortingLayerName = "Foreground";
         rightLine.sortingLayerName = "Foreground";
 
-        leftLine.sortingOrder = 3;
+        leftLine.sortingOrder = 1;
         rightLine.sortingOrder = 1;
     }
 
