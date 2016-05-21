@@ -5,13 +5,14 @@ public class Ball : MonoBehaviour
 {
 
     public float maxStretch = 3.0f;
-    public LineRenderer catapultLineFront;
-    public LineRenderer catapultLineBack;
+    public LineRenderer leftLine;
+    public LineRenderer rightLine;
 
     private SpringJoint2D spring;
-    private Transform catapult;
-    private Ray rayToMouse;
-    private Ray leftCatapultToProjectile;
+    private Transform center;
+    private Ray leftRay;
+    private Ray rightRay;
+    private Ray centerRay;
     private float maxStretchSqr;
     private float circleRadius;
     private bool clickedOn;
@@ -20,15 +21,16 @@ public class Ball : MonoBehaviour
     void Awake()
     {
         spring = GetComponent<SpringJoint2D>();
-        catapult = spring.connectedBody.transform;
+        center = spring.connectedBody.transform;
     }
 
     // Use this for initialization
     void Start()
     {
         LineRendererSetup();
-        rayToMouse = new Ray(catapult.position, Vector3.zero);
-        leftCatapultToProjectile = new Ray(catapultLineFront.transform.position, Vector3.zero);
+        leftRay = new Ray(leftLine.transform.position, this.transform.position);
+        rightRay = new Ray(rightLine.transform.position, this.transform.position);
+        centerRay = new Ray(center.position, this.transform.position);
         maxStretchSqr = maxStretch * maxStretch;
         CircleCollider2D circle = GetComponent<Collider2D>() as CircleCollider2D;
         circleRadius = circle.radius;
@@ -51,7 +53,6 @@ public class Ball : MonoBehaviour
             if (!clickedOn)
             {
                 prevVelocity = GetComponent<Rigidbody2D>().velocity;
-                prevVelocity = GetComponent<Rigidbody2D>().velocity;
             }
 
             LineRendererUpdate();
@@ -59,21 +60,21 @@ public class Ball : MonoBehaviour
         }
         else
         {
-            catapultLineFront.enabled = false;
-            catapultLineBack.enabled = false;
+            leftLine.enabled = false;
+            rightLine.enabled = false;
         }
     }
 
     void LineRendererSetup()
     {
-        catapultLineFront.SetPosition(0, catapultLineFront.transform.position);
-        catapultLineBack.SetPosition(0, catapultLineBack.transform.position);
+        leftLine.SetPosition(0, leftLine.transform.position);
+        rightLine.SetPosition(0, rightLine.transform.position);
 
-        catapultLineFront.sortingLayerName = "Foreground";
-        catapultLineBack.sortingLayerName = "Foreground";
+        leftLine.sortingLayerName = "Foreground";
+        rightLine.sortingLayerName = "Foreground";
 
-        catapultLineFront.sortingOrder = 3;
-        catapultLineBack.sortingOrder = 1;
+        leftLine.sortingOrder = 3;
+        rightLine.sortingOrder = 1;
     }
 
     void OnMouseDown()
@@ -92,12 +93,12 @@ public class Ball : MonoBehaviour
     void Dragging()
     {
         Vector3 mouseWorldPoint = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        Vector2 catapultToMouse = mouseWorldPoint - catapult.position;
+        Vector2 catapultToMouse = mouseWorldPoint - center.position;
 
         if (catapultToMouse.sqrMagnitude > maxStretchSqr)
         {
-            rayToMouse.direction = catapultToMouse;
-            mouseWorldPoint = rayToMouse.GetPoint(maxStretch);
+            centerRay.direction = catapultToMouse;
+            mouseWorldPoint = centerRay.GetPoint(maxStretch);
         }
 
         mouseWorldPoint.z = 0f;
@@ -106,10 +107,17 @@ public class Ball : MonoBehaviour
 
     void LineRendererUpdate()
     {
-        Vector2 catapultToProjectile = transform.position - catapultLineFront.transform.position;
-        leftCatapultToProjectile.direction = catapultToProjectile;
-        Vector3 holdPoint = leftCatapultToProjectile.GetPoint(catapultToProjectile.magnitude + circleRadius);
-        catapultLineFront.SetPosition(1, holdPoint);
-        catapultLineBack.SetPosition(1, holdPoint);
+        Vector2 leftToProjectile = transform.position - leftLine.transform.position;
+        Vector2 rightToProjectile = transform.position - rightLine.transform.position;
+        leftRay.direction = leftToProjectile;
+        rightRay.direction = rightToProjectile;
+        //Vector3 leftPoint = leftRay.GetPoint(leftToProjectile.magnitude + circleRadius);
+        //Vector3 rightPoint = rightRay.GetPoint(rightToProjectile.magnitude + circleRadius);
+
+        Vector3 leftPoint = leftRay.GetPoint(leftToProjectile.magnitude);
+        Vector3 rightPoint = rightRay.GetPoint(rightToProjectile.magnitude);
+
+        leftLine.SetPosition(1, leftPoint);
+        rightLine.SetPosition(1, rightPoint);
     }
 }
