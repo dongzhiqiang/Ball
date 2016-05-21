@@ -17,10 +17,12 @@ public class Ball : MonoBehaviour
     private float circleRadius;
     private bool clickedOn;
     private Vector2 prevVelocity;
+    private Rigidbody2D body2d;
 
     void Awake()
     {
         spring = GetComponent<SpringJoint2D>();
+        body2d = GetComponent<Rigidbody2D>();
         center = spring.connectedBody.transform;
     }
 
@@ -44,15 +46,15 @@ public class Ball : MonoBehaviour
 
         if (spring != null)
         {
-            if (!GetComponent<Rigidbody2D>().isKinematic && prevVelocity.sqrMagnitude > GetComponent<Rigidbody2D>().velocity.sqrMagnitude)
+            if (!body2d.isKinematic && prevVelocity.sqrMagnitude > body2d.velocity.sqrMagnitude)
             {
                 Destroy(spring);
-                GetComponent<Rigidbody2D>().velocity = prevVelocity;
+                body2d.velocity = prevVelocity;
             }
 
             if (!clickedOn)
             {
-                prevVelocity = GetComponent<Rigidbody2D>().velocity;
+                prevVelocity = body2d.velocity;
             }
 
             LineRendererUpdate();
@@ -86,7 +88,7 @@ public class Ball : MonoBehaviour
     void OnMouseUp()
     {
         spring.enabled = true;
-        GetComponent<Rigidbody2D>().isKinematic = false;
+        body2d.isKinematic = false;
         clickedOn = false;
     }
 
