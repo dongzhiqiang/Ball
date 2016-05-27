@@ -55,6 +55,7 @@ public class Ball : MonoBehaviour
             if (!clickedOn)
             {
                 prevVelocity = body2d.velocity;
+                Debug.Log("velocity : " + prevVelocity);
             }
 
             LineRendererUpdate();
